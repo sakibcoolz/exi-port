@@ -1,0 +1,270 @@
+// This is your Prisma schema file for Exi-port.com
+// Global Trade Classified Platform Database Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User management models
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  name            String?
+  password        String?
+  phone           String?
+  avatar          String?
+  company         String?
+  website         String?
+  address         String?
+  city            String?
+  state           String?
+  country         String?
+  postalCode      String?
+  isVerified      Boolean   @default(false)
+  emailVerified   DateTime?
+  role            UserRole  @default(USER)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  products        Product[]
+  tradeSuggestions TradeSuggestion[]
+  sessions        Session[]
+  accounts        Account[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// Product and Trade models
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  image       String?
+  isActive    Boolean   @default(true)
+  parentId    String?
+  parent      Category? @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  products    Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id            String       @id @default(cuid())
+  title         String
+  slug          String       @unique
+  description   String       @db.Text
+  shortDesc     String?
+  price         Decimal?     @db.Decimal(10, 2)
+  currency      String       @default("USD")
+  minOrder      String?
+  unit          String?
+  images        String[]     @default([])
+  specifications Json?
+  hsCode        String?
+  origin        String?
+  brand         String?
+  model         String?
+  condition     ProductCondition @default(NEW)
+  availability  ProductAvailability @default(AVAILABLE)
+  status        ProductStatus @default(ACTIVE)
+  views         Int          @default(0)
+  isPromoted    Boolean      @default(false)
+  promotedUntil DateTime?
+  expiresAt     DateTime?
+  
+  // Location fields
+  country       String
+  state         String?
+  city          String?
+  
+  // SEO fields
+  metaTitle     String?
+  metaDesc      String?
+  keywords      String[]     @default([])
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  // Relations
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId    String
+  category      Category     @relation(fields: [categoryId], references: [id])
+
+  @@index([userId])
+  @@index([categoryId])
+  @@index([country])
+  @@index([status])
+  @@index([createdAt])
+  @@map("products")
+}
+
+model TradeSuggestion {
+  id              String      @id @default(cuid())
+  type            TradeType
+  title           String
+  description     String      @db.Text
+  
+  // Product details
+  productCategory String
+  productName     String?
+  quantity        String?
+  unit            String?
+  specifications  Json?
+  qualityStandards String?
+  
+  // Pricing
+  budgetMin       Decimal?    @db.Decimal(10, 2)
+  budgetMax       Decimal?    @db.Decimal(10, 2)
+  currency        String      @default("USD")
+  
+  // Location
+  country         String
+  state           String?
+  city            String?
+  preferredRegions String[]   @default([])
+  
+  // Timeline
+  urgency         UrgencyLevel @default(NORMAL)
+  expectedDate    DateTime?
+  
+  // Contact preferences
+  contactMethod   ContactMethod @default(EMAIL)
+  phoneNumber     String?
+  email           String?
+  preferredTime   String?
+  
+  // Status
+  status          SuggestionStatus @default(ACTIVE)
+  views           Int         @default(0)
+  responses       Int         @default(0)
+  
+  // Expiry
+  expiresAt       DateTime?
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  // Relations
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([type])
+  @@index([country])
+  @@index([productCategory])
+  @@index([status])
+  @@index([createdAt])
+  @@map("trade_suggestions")
+}
+
+// Enums
+enum UserRole {
+  USER
+  ADMIN
+  MODERATOR
+  EXPORTER
+  IMPORTER
+  AGENT
+  BUYER
+}
+
+enum ProductCondition {
+  NEW
+  USED
+  REFURBISHED
+}
+
+enum ProductAvailability {
+  AVAILABLE
+  OUT_OF_STOCK
+  LIMITED
+  ON_DEMAND
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+  REJECTED
+  EXPIRED
+}
+
+enum TradeType {
+  BUYING
+  SELLING
+  PARTNERSHIP
+  INVESTMENT
+}
+
+enum SuggestionStatus {
+  ACTIVE
+  CLOSED
+  EXPIRED
+  PENDING
+}
+
+enum UrgencyLevel {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum ContactMethod {
+  EMAIL
+  PHONE
+  WHATSAPP
+  BOTH
+}
