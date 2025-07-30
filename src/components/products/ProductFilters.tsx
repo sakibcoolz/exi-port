@@ -118,9 +118,10 @@ export default function ProductFilters({ filters, onFilterChange }: ProductFilte
   )
 
   return (
-    <div className="space-y-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
       {/* Category Filter */}
-      <FilterSection title="Category" section="category">
+      <div className="lg:col-span-1">
+        <FilterSection title="Category" section="category">
         <div className="space-y-2">
           <label className="flex items-center">
             <input
@@ -162,9 +163,11 @@ export default function ProductFilters({ filters, onFilterChange }: ProductFilte
           )}
         </div>
       </FilterSection>
+      </div>
 
       {/* Location Filter */}
-      <FilterSection title="Location" section="location">
+      <div className="lg:col-span-1">
+        <FilterSection title="Location" section="location">
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-2">
             Country
@@ -183,33 +186,34 @@ export default function ProductFilters({ filters, onFilterChange }: ProductFilte
           </select>
         </div>
       </FilterSection>
+      </div>
 
       {/* Price Range Filter */}
-      <FilterSection title="Price Range" section="price">
+      <div className="lg:col-span-1">
+        <FilterSection title="Price Range" section="price">
         <div className="space-y-3">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-2">
-              Minimum Price (USD)
+              Price Range (USD)
             </label>
-            <input
-              type="number"
-              placeholder="0"
-              value={filters.minPrice}
-              onChange={(e) => onFilterChange('minPrice', e.target.value)}
-              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-2">
-              Maximum Price (USD)
-            </label>
-            <input
-              type="number"
-              placeholder="Any"
-              value={filters.maxPrice}
-              onChange={(e) => onFilterChange('maxPrice', e.target.value)}
-              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                type="number"
+                placeholder="Min"
+                value={filters.minPrice}
+                onChange={(e) => onFilterChange('minPrice', e.target.value)}
+                className="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+                style={{ WebkitAppearance: 'none', MozAppearance: 'textfield' }}
+              />
+              <input
+                type="number"
+                placeholder="Max"
+                value={filters.maxPrice}
+                onChange={(e) => onFilterChange('maxPrice', e.target.value)}
+                className="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+                style={{ WebkitAppearance: 'none', MozAppearance: 'textfield' }}
+              />
+            </div>
           </div>
           
           {/* Quick Price Ranges */}
@@ -243,9 +247,11 @@ export default function ProductFilters({ filters, onFilterChange }: ProductFilte
           </div>
         </div>
       </FilterSection>
+      </div>
 
       {/* Condition Filter */}
-      <FilterSection title="Condition" section="condition">
+      <div className="lg:col-span-1">
+        <FilterSection title="Condition" section="condition">
         <div className="space-y-2">
           {conditions.map((condition) => (
             <label key={condition.value} className="flex items-center">
@@ -262,9 +268,11 @@ export default function ProductFilters({ filters, onFilterChange }: ProductFilte
           ))}
         </div>
       </FilterSection>
+      </div>
 
       {/* Availability Filter */}
-      <FilterSection title="Availability" section="availability">
+      <div className="lg:col-span-1">
+        <FilterSection title="Availability" section="availability">
         <div className="space-y-2">
           {availabilityOptions.map((option) => (
             <label key={option.value} className="flex items-center">
@@ -281,9 +289,10 @@ export default function ProductFilters({ filters, onFilterChange }: ProductFilte
           ))}
         </div>
       </FilterSection>
+      </div>
 
       {/* Desktop Sort (hidden on mobile since it's in the main controls) */}
-      <div className="hidden lg:block">
+      <div className="hidden lg:block lg:col-span-1">
         <FilterSection title="Sort By" section="availability">
           <select
             value={filters.sortBy}
